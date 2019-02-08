@@ -31,7 +31,7 @@ typedef struct _SafeStopSign {
 	pthread_cond_t s_lane;
 	pthread_cond_t e_lane;
 	pthread_cond_t w_lane;
-	IntQueue_t *carQueue;
+	struct IntQueue *carQueue;
 
 } SafeStopSign;
 
@@ -40,15 +40,15 @@ typedef struct _SafeStopSign {
  */
 struct IntQueueNode {
     int val;
-    IntQueueNode_t *next;
+    struct IntQueueNode *next;
 };
 
 /**
  * A queue data structure that holds integers
  */
 struct IntQueue {
-    IntQueueNode_t *head;
-    IntQueueNode_t *tail;
+    struct IntQueueNode *head;
+    struct IntQueueNode *tail;
     int size;
 };
 
