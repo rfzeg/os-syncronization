@@ -26,6 +26,11 @@ typedef struct _SafeStopSign {
 	StopSign base;
 
 	// TODO: Add any members you need for synchronization here.
+	pthread_mutex_t mutex;
+	pthread_cond_t n_lane;
+	pthread_cond_t s_lane;
+	pthread_cond_t e_lane;
+	pthread_cond_t w_lane;
 
 } SafeStopSign;
 

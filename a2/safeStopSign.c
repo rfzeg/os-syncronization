@@ -16,6 +16,7 @@ void destroySafeStopSign(SafeStopSign* sign) {
 	destroyStopSign(&sign->base);
 
 	// TODO: Add any logic you need to clean up data structures.
+	
 }
 
 void runStopSignCar(Car* car, SafeStopSign* sign) {
