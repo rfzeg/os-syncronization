@@ -36,20 +36,20 @@ typedef struct _SafeStopSign {
 } SafeStopSign;
 
 /**
- * A queue data structure that holds integers
- */
-struct IntQueue {
-    IntQueueNode *head;
-    IntQueueNode *tail;
-    int size;
-};
-
-/**
  * A node that forms one element of our IntQueue. Has a value, and a pointer to the next node
  */
 struct IntQueueNode {
     int val;
-    IntQueueNode *next;
+    IntQueueNode_t *next;
+};
+
+/**
+ * A queue data structure that holds integers
+ */
+struct IntQueue {
+    IntQueueNode_t *head;
+    IntQueueNode_t *tail;
+    int size;
 };
 
 typedef struct IntQueue IntQueue_t;
