@@ -76,14 +76,26 @@ void destroySafeStopSign(SafeStopSign* sign) {
 
 	// TODO: Add any logic you need to clean up data structures.
 	freeQueue(&sign->carQueue);
+
+	pthread_cond_destroy(&sign->n_lane_cv);
+	pthread_cond_destroy(&sign->s_lane_cv);
+	pthread_cond_destroy(&sign->e_lane_cv);
+	pthread_cond_destroy(&sign->w_lane_cv);
+
+	pthread_mutex_destroy(&sign->n_lock);
+	pthread_mutex_destroy(&sign->s_lock);
+	pthread_mutex_destroy(&sign->e_lock);
+	pthread_mutex_destroy(&sign->w_lock);
 }
+
 
 void runStopSignCar(Car* car, SafeStopSign* sign) {
 
 	// TODO: Add your synchronization logic to this function.
-
+	
 	EntryLane* lane = getLane(car, &sign->base);
 	enterLane(car, lane);
+
 
 	goThroughStopSign(car, &sign->base);
 
