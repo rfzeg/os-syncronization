@@ -56,13 +56,26 @@ void initSafeStopSign(SafeStopSign* sign, int count) {
 
 	// TODO: Add any initialization logic you need.
 	sign->carQueue = initIntQueue();
+
+	initMutex(&sign->n_lock);
+	initMutex(&sign->s_lock);
+	initMutex(&sign->e_lock);
+	initMutex(&sign->w_lock);
+
+	initConditionVariable(&sign->n_lane_cv);
+	initConditionVariable(&sign->s_lane_cv);
+	initConditionVariable(&sign->e_lane_cv);
+	initConditionVariable(&sign->w_lane_cv);
+
+
+
 }
 
 void destroySafeStopSign(SafeStopSign* sign) {
 	destroyStopSign(&sign->base);
 
 	// TODO: Add any logic you need to clean up data structures.
-	
+	freeQueue(&sign->carQueue);
 }
 
 void runStopSignCar(Car* car, SafeStopSign* sign) {
