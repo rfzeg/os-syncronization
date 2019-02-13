@@ -50,7 +50,7 @@ void freeQueue(IntQueue_t *q){
 	}
 	free(q);
 }
-
+int QUADRANT[4] = {0,0,0,0};
 void initSafeStopSign(SafeStopSign* sign, int count) {
 	initStopSign(&sign->base, count);
 
@@ -66,9 +66,6 @@ void initSafeStopSign(SafeStopSign* sign, int count) {
 	initConditionVariable(&sign->s_lane_cv);
 	initConditionVariable(&sign->e_lane_cv);
 	initConditionVariable(&sign->w_lane_cv);
-
-
-
 }
 
 void destroySafeStopSign(SafeStopSign* sign) {
@@ -90,12 +87,12 @@ void destroySafeStopSign(SafeStopSign* sign) {
 
 
 void runStopSignCar(Car* car, SafeStopSign* sign) {
-
 	// TODO: Add your synchronization logic to this function.
-	int laneNum, exitCar;
+	int laneNum, exitCar, carAction;
 
 	EntryLane* lane = getLane(car, &sign->base);
 	laneNum = car->position;
+	carAction = car->action;
 	
 	enterLane(car, lane);
 	enqueue(sign->carQueue, car->index);
@@ -103,5 +100,4 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 	goThroughStopSign(car, &sign->base);
 	exitCar = dequeue(sign->carQueue);
 	exitIntersection(car, lane);
-	
 }
