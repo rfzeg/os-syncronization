@@ -26,15 +26,15 @@ typedef struct _SafeStopSign {
 	StopSign base;
 
 	// TODO: Add any members you need for synchronization here.
-	pthread_mutex_t n_lock;
-	pthread_mutex_t s_lock;
-	pthread_mutex_t e_lock;
-	pthread_mutex_t w_lock;
+	pthread_mutex_t nLock;
+	pthread_mutex_t sLock;
+	pthread_mutex_t eLock;
+	pthread_mutex_t wLock;
 
-	pthread_cond_t n_lane_cv;
-	pthread_cond_t s_lane_cv;
-	pthread_cond_t e_lane_cv;
-	pthread_cond_t w_lane_cv;
+	pthread_cond_t northLaneCV;
+	pthread_cond_t southLaneCV;
+	pthread_cond_t eastLaneCV;
+	pthread_cond_t westLaneCV;
 
     struct IntQueue *northQueue;
     struct IntQueue *southQueue;
