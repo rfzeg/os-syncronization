@@ -94,10 +94,13 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 	// TODO: Add your synchronization logic to this function.
 	
 	EntryLane* lane = getLane(car, &sign->base);
+	int laneNum = &car->position;
+	
 	enterLane(car, lane);
-
-
+	enqueue(sign->carQueue, car->index);
+	
 	goThroughStopSign(car, &sign->base);
-
+	int exitCar = dequeue(sign->carQueue);
 	exitIntersection(car, lane);
+	
 }
