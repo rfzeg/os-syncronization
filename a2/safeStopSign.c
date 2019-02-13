@@ -6,6 +6,7 @@
 */
 #include "safeStopSign.h"
 
+int quadrants[4] = {0,0,0,0};
 
 IntQueue_t *initIntQueue(){
 	IntQueue_t *int_queue = malloc(sizeof(IntQueue_t));
@@ -50,7 +51,7 @@ void freeQueue(IntQueue_t *q){
 	}
 	free(q);
 }
-int QUADRANT[4] = {0,0,0,0};
+
 void initSafeStopSign(SafeStopSign* sign, int count) {
 	initStopSign(&sign->base, count);
 
@@ -60,28 +61,28 @@ void initSafeStopSign(SafeStopSign* sign, int count) {
 	sign->eastQueue = initIntQueue();
 	sign->westQueue = initIntQueue();
 
-	initMutex(&sign->n_lock);
-	initMutex(&sign->s_lock);
-	initMutex(&sign->e_lock);
-	initMutex(&sign->w_lock);
+	initMutex(&sign->nLock);
+	initMutex(&sign->sLock);
+	initMutex(&sign->eLock);
+	initMutex(&sign->wLock);
 
-	initConditionVariable(&sign->n_lane_cv);
-	initConditionVariable(&sign->s_lane_cv);
-	initConditionVariable(&sign->e_lane_cv);
-	initConditionVariable(&sign->w_lane_cv);
+	initConditionVariable(&sign->northLaneCV);
+	initConditionVariable(&sign->southLaneCV);
+	initConditionVariable(&sign->eastLaneCV);
+	initConditionVariable(&sign->westLaneCV);
 
 	sign->laneMutexArr = malloc(sizeof(pthread_mutex_t) * 4);
 	sign->laneCondVarArr = malloc(sizeof(sign->laneCondVarArr) * 4);
 
-	sign->laneMutexArr[0] = &sign->e_lock;
-	sign->laneMutexArr[1] = &sign->n_lock;
-	sign->laneMutexArr[2] = &sign->w_lock;
-	sign->laneMutexArr[3] = &sign->s_lock;
+	sign->laneMutexArr[0] = &sign->eLock;
+	sign->laneMutexArr[1] = &sign->nLock;
+	sign->laneMutexArr[2] = &sign->wLock;
+	sign->laneMutexArr[3] = &sign->sLock;
 
-	sign->laneCondVarArr[0] = &sign->e_lane_cv;
-	sign->laneCondVarArr[1] = &sign->n_lane_cv;
-	sign->laneCondVarArr[2] = &sign->w_lane_cv;
-	sign->laneCondVarArr[3] = &sign->s_lane_cv;
+	sign->laneCondVarArr[0] = &sign->eastLaneCV;
+	sign->laneCondVarArr[1] = &sign->northLaneCV;
+	sign->laneCondVarArr[2] = &sign->westLaneCV;
+	sign->laneCondVarArr[3] = &sign->southLaneCV;
 
 	sign->laneQueues = malloc(sizeof(IntQueue_t *) * 4);
 	sign->laneQueues[0] = sign->eastQueue;
@@ -100,15 +101,15 @@ void destroySafeStopSign(SafeStopSign* sign) {
 	freeQueue(sign->eastQueue);
 	freeQueue(sign->westQueue);
 
-	pthread_cond_destroy(&sign->n_lane_cv);
-	pthread_cond_destroy(&sign->s_lane_cv);
-	pthread_cond_destroy(&sign->e_lane_cv);
-	pthread_cond_destroy(&sign->w_lane_cv);
+	pthread_cond_destroy(&sign->northLaneCV);
+	pthread_cond_destroy(&sign->southLaneCV);
+	pthread_cond_destroy(&sign->eastLaneCV);
+	pthread_cond_destroy(&sign->westLaneCV);
 
-	pthread_mutex_destroy(&sign->n_lock);
-	pthread_mutex_destroy(&sign->s_lock);
-	pthread_mutex_destroy(&sign->e_lock);
-	pthread_mutex_destroy(&sign->w_lock);
+	pthread_mutex_destroy(&sign->nLock);
+	pthread_mutex_destroy(&sign->sLock);
+	pthread_mutex_destroy(&sign->eLock);
+	pthread_mutex_destroy(&sign->wLock);
 }
 
 
@@ -127,10 +128,10 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 				"@ " __FILE__ " : " LINE_STRING "\n");
 	}
 	enterLane(car, lane);
-	// enqueue(sign->carQueue, car->index);
+	enqueue(sign->laneQueues[laneNum], car->index);
 	
 	goThroughStopSign(car, &sign->base);
-	// exitCar = dequeue(sign->carQueue);
+	exitCar = dequeue(sign->laneQueues[laneNum]);
 	exitIntersection(car, lane);
 
 	unlock(sign->laneMutexArr[laneNum]);
