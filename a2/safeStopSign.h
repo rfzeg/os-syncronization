@@ -41,19 +41,18 @@ typedef struct _SafeStopSign {
     struct IntQueue *eastQueue;
     struct IntQueue *westQueue;
 
+    // An array to hold mutexes corresponding to each lane
+	pthread_mutex_t **laneMutexArr;
 
+    // An array to hold condition variables corresponding to each lane
+	pthread_cond_t **laneCondVarArr;
+
+	static struct IntQueue **laneQueues;
 
 } SafeStopSign;
 
-/**
- * An array to hold mutexes corresponding to each lane
- */
-pthread_mutex_t **laneMutexArr;
 
- /**
- * An array to hold condition variables corresponding to each lane
- */
-pthread_cond_t **laneCondVarArr;
+
 
 /**
  * A node that forms one element of our IntQueue. Has a value, and a pointer to the next node

@@ -70,18 +70,24 @@ void initSafeStopSign(SafeStopSign* sign, int count) {
 	initConditionVariable(&sign->e_lane_cv);
 	initConditionVariable(&sign->w_lane_cv);
 
-	laneMutexArr = malloc(sizeof(pthread_mutex_t) * 4);
-	laneCondVarArr = malloc(sizeof(laneCondVarArr) * 4);
+	sign->laneMutexArr = malloc(sizeof(pthread_mutex_t) * 4);
+	sign->laneCondVarArr = malloc(sizeof(sign->laneCondVarArr) * 4);
 
-	laneMutexArr[0] = &sign->e_lock;
-	laneMutexArr[1] = &sign->n_lock;
-	laneMutexArr[2] = &sign->w_lock;
-	laneMutexArr[3] = &sign->s_lock;
+	sign->laneMutexArr[0] = &sign->e_lock;
+	sign->laneMutexArr[1] = &sign->n_lock;
+	sign->laneMutexArr[2] = &sign->w_lock;
+	sign->laneMutexArr[3] = &sign->s_lock;
 
-	laneCondVarArr[0] = &sign->e_lane_cv;
-	laneCondVarArr[1] = &sign->n_lane_cv;
-	laneCondVarArr[2] = &sign->w_lane_cv;
-	laneCondVarArr[3] = &sign->s_lane_cv;
+	sign->laneCondVarArr[0] = &sign->e_lane_cv;
+	sign->laneCondVarArr[1] = &sign->n_lane_cv;
+	sign->laneCondVarArr[2] = &sign->w_lane_cv;
+	sign->laneCondVarArr[3] = &sign->s_lane_cv;
+
+	sign->laneQueues = malloc(sizeof(IntQueue_t *) * 4);
+	sign->laneQueues[0] = sign->eastQueue;
+	sign->laneQueues[1] = sign->northQueue;
+	sign->laneQueues[2] = sign->westQueue;
+	sign->laneQueues[3] = sign->southQueue;
 
 }
 
@@ -115,7 +121,7 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 	EntryLane* lane = getLane(car, &sign->base);
 	laneNum = car->position;
 	carAction = car->action;
-	int ret = pthread_mutex_lock(&laneMutexArr[laneNum]);
+	int ret = pthread_mutex_lock(&sign->laneMutexArr[laneNum]);
 	if (ret != 0){
 		perror("Mutex lock failed."
 				"@ " __FILE__ " : " LINE_STRING "\n");
@@ -127,5 +133,5 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 	// exitCar = dequeue(sign->carQueue);
 	exitIntersection(car, lane);
 
-	unlock(&laneMutexArr[laneNum]);
+	unlock(&sign->laneMutexArr[laneNum]);
 }
