@@ -31,6 +31,8 @@ typedef struct _SafeStopSign {
 	pthread_mutex_t e_lock;
 	pthread_mutex_t w_lock;
 
+	pthread_mutex_t laneLock;
+
 	pthread_cond_t n_lane_cv;
 	pthread_cond_t s_lane_cv;
 	pthread_cond_t e_lane_cv;
@@ -48,6 +50,7 @@ typedef struct _SafeStopSign {
 	pthread_cond_t **laneCondVarArr;
 
 	struct IntQueue **laneQueues;
+
 
 } SafeStopSign;
 
