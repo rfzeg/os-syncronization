@@ -118,11 +118,18 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 	EntryLane* lane = getLane(car, &sign->base);
 	laneNum = car->position;
 	carAction = car->action;
-	
+	int ret = pthread_mutex_lock(&laneMutexArr[laneNum]);
+	if (ret != 0){
+		perror("Mutex lock failed."
+				"@ " __FILE__ " : " LINE_STRING "\n");
+	}
+
 	enterLane(car, lane);
 	// enqueue(sign->carQueue, car->index);
 	
 	goThroughStopSign(car, &sign->base);
 	// exitCar = dequeue(sign->carQueue);
 	exitIntersection(car, lane);
+
+	unlock(&laneMutexArr[laneNum]);
 }
