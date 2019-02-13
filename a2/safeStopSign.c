@@ -50,12 +50,15 @@ void freeQueue(IntQueue_t *q){
 	}
 	free(q);
 }
-
+int QUADRANT[4] = {0,0,0,0};
 void initSafeStopSign(SafeStopSign* sign, int count) {
 	initStopSign(&sign->base, count);
 
 	// TODO: Add any initialization logic you need.
-	sign->carQueue = initIntQueue();
+	sign->northQueue = initIntQueue();
+	sign->southQueue = initIntQueue();
+	sign->eastQueue = initIntQueue();
+	sign->westQueue = initIntQueue();
 
 	initMutex(&sign->n_lock);
 	initMutex(&sign->s_lock);
@@ -86,7 +89,10 @@ void destroySafeStopSign(SafeStopSign* sign) {
 	destroyStopSign(&sign->base);
 
 	// TODO: Add any logic you need to clean up data structures.
-	freeQueue(sign->carQueue);
+	freeQueue(sign->northQueue);
+	freeQueue(sign->southQueue);
+	freeQueue(sign->eastQueue);
+	freeQueue(sign->westQueue);
 
 	pthread_cond_destroy(&sign->n_lane_cv);
 	pthread_cond_destroy(&sign->s_lane_cv);
@@ -101,18 +107,19 @@ void destroySafeStopSign(SafeStopSign* sign) {
 
 
 void runStopSignCar(Car* car, SafeStopSign* sign) {
-
 	// TODO: Add your synchronization logic to this function.
-	int laneNum, exitCar;
+	int laneNum, exitCar, carAction;
 
+	int quadrantsNeeded[3] = {0,0,0};
+	int quadrantCount = getStopSignRequiredQuadrants(car,quadrantsNeeded);
 	EntryLane* lane = getLane(car, &sign->base);
 	laneNum = car->position;
-
+	
+	carAction = car->action;
 	enterLane(car, lane);
-	enqueue(sign->carQueue, car->index);
+	// enqueue(sign->carQueue, car->index);
 	
 	goThroughStopSign(car, &sign->base);
-	exitCar = dequeue(sign->carQueue);
+	// exitCar = dequeue(sign->carQueue);
 	exitIntersection(car, lane);
-	
 }

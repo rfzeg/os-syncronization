@@ -36,7 +36,10 @@ typedef struct _SafeStopSign {
 	pthread_cond_t e_lane_cv;
 	pthread_cond_t w_lane_cv;
 
-    struct IntQueue *carQueue;
+    struct IntQueue *northQueue;
+    struct IntQueue *southQueue;
+    struct IntQueue *eastQueue;
+    struct IntQueue *westQueue;
 
 
 
