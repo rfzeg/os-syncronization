@@ -83,9 +83,6 @@ void initSafeStopSign(SafeStopSign* sign, int count) {
 	laneCondVarArr[2] = &sign->w_lane_cv;
 	laneCondVarArr[3] = &sign->s_lane_cv;
 
-
-
-
 }
 
 void destroySafeStopSign(SafeStopSign* sign) {
@@ -123,7 +120,6 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 		perror("Mutex lock failed."
 				"@ " __FILE__ " : " LINE_STRING "\n");
 	}
-
 	enterLane(car, lane);
 	// enqueue(sign->carQueue, car->index);
 	
