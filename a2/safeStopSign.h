@@ -47,7 +47,7 @@ typedef struct _SafeStopSign {
     // An array to hold condition variables corresponding to each lane
 	pthread_cond_t **laneCondVarArr;
 
-	static struct IntQueue **laneQueues;
+	struct IntQueue **laneQueues;
 
 } SafeStopSign;
 
