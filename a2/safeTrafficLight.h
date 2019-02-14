@@ -25,38 +25,8 @@ typedef struct _SafeTrafficLight {
 	*/
 	TrafficLight base;
 	// TODO: Add any members you need for synchronization here.
-	pthread_mutex_t eastStraightLock;
-	pthread_mutex_t eastLeftLock;
-	pthread_mutex_t eastRightLock;
-
-	pthread_mutex_t southStraightLock;
-	pthread_mutex_t southLeftLock;
-	pthread_mutex_t southRightLock;
-
-	pthread_mutex_t westStraightLock;
-	pthread_mutex_t westLeftLock;
-	pthread_mutex_t westRightLock;
-
-	pthread_mutex_t northStraightLock;
-	pthread_mutex_t northLeftLock;
-	pthread_mutex_t northRightLock;
-
-	pthread_cond_t eastStraightCV;
-	pthread_cond_t eastLeftCV;
-	pthread_cond_t eastRightCV;
-
-	pthread_cond_t southStraightCV;
-	pthread_cond_t southLeftCV;
-	pthread_cond_t southRightCV;
-
-	pthread_cond_t westStraightCV;
-	pthread_cond_t westLeftCV;
-	pthread_cond_t westRightCV;
-
-	pthread_cond_t northStraightCV;
-	pthread_cond_t northLeftCV;
-	pthread_cond_t northRightCV;
-
+	pthread_mutex_t lockArr[TRAFFIC_LIGHT_LANE_COUNT];
+	pthread_mutex_t cvArr[TRAFFIC_LIGHT_LANE_COUNT];
 
 } SafeTrafficLight;
 
@@ -83,3 +53,24 @@ void destroySafeTrafficLight(SafeTrafficLight* light);
 * @param light pointer to the traffic light intersection.
 */
 void runTrafficLightCar(Car* car, SafeTrafficLight* light);
+
+/**
+* @brief Destroys a mutex and does error checking.
+*
+* @param mutex pointer to the mutex to initialize.
+*/
+void destroyMutex(pthread_mutex_t* mutex);
+
+/**
+* @brief Destroys a condition variable and does error checking.
+*
+* @param cond pointer to the condition variable to initialize.
+*/
+void destroyConditionVariable(pthread_cond_t* cond);
+
+/**
+* @brief Locks a mutex and does error checking.
+*
+* @param mutex pointer to the mutex to lock.
+*/
+void lock(pthread_mutex_t *mutex);

@@ -10,12 +10,23 @@ void initSafeTrafficLight(SafeTrafficLight* light, int horizontal, int vertical)
 	initTrafficLight(&light->base, horizontal, vertical);
 
 	// TODO: Add any initialization logic you need.
+	int i;
+	for (i=0;i<TRAFFIC_LIGHT_LANE_COUNT;i++){
+		initMutex(&light->lockArr[i]);
+		initConditionVariable(&light->cvArr[i]);
+	}
+
 }
 
 void destroySafeTrafficLight(SafeTrafficLight* light) {
 	destroyTrafficLight(&light->base);
 
 	// TODO: Add any logic you need to free data structures
+	int i;
+	for (i=0;i<TRAFFIC_LIGHT_LANE_COUNT;i++){
+		destroyMutex(&light->lockArr[i]);
+		destroyConditionVariable(&light->cvArr[i]);
+	}
 }
 
 void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
@@ -32,4 +43,47 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 
 	exitIntersection(car, lane);
 
+}
+
+// some helpers from trafficLight.c
+
+// LightState getOppositeDirection(LightState mode) {
+// 	assert(mode != RED);
+// 	return (LightState)(1 - (int)mode);
+// }
+
+// LightState getLightState(TrafficLight* light) {
+// 	return light->currentMode;
+// }
+
+// int getStraightCount(TrafficLight* light, int position) {
+// 	return light->straightCounts[position];
+// }
+
+// int getLaneIndexLight(Car* car) {
+// 	return car->position * 3 + car->action;
+// }
+
+void lock(pthread_mutex_t *mutex) {
+	int returnValue = pthread_mutex_lock(mutex);
+	if (returnValue != 0) {
+		perror("Mutex lock failed."
+			   "@ " __FILE__ " : " LINE_STRING "\n");
+	}
+}
+
+void destroyMutex(pthread_mutex_t* mutex) {
+	int returnValue = pthread_mutex_destroy(mutex);
+	if (returnValue != 0) {
+		perror("Mutex destruction failed."
+				"@ " __FILE__ " : " LINE_STRING "\n");	
+	}
+}
+
+void destroyConditionVariable(pthread_cond_t* cond) {
+	int returnValue = pthread_cond_destroy(cond);
+	if (returnValue != 0) {
+		perror("Condition variable destruction failed."
+				"@ " __FILE__ " : " LINE_STRING "\n");	
+	}
 }
