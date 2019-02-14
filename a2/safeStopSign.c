@@ -116,12 +116,17 @@ void destroySafeStopSign(SafeStopSign* sign) {
 	free(sign->laneQueues);
 }
 
+int claimQuadrants(int *quadrants) {
+	for (int i = 0; i < sizeof(quadrantClaims) / sizeof(int); i++) {
+		if (quadrantClaims[i] != 0 || quadrantClaims[i])
+	}
+}
 
 void runStopSignCar(Car* car, SafeStopSign* sign) {
 	// TODO: Add your synchronization logic to this function.
 	int laneNum, exitCar, carAction;
 
-	int quadrantsNeeded[QUADRANT_COUNT];
+	int quadrantsNeeded = malloc(sizeof(int) * QUADRANT_COUNT);
 	int quadrantCount = getStopSignRequiredQuadrants(car,quadrantsNeeded);
 	EntryLane* lane = getLane(car, &sign->base);
 	laneNum = car->position;
@@ -144,6 +149,7 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 	}
 	unlock(&sign->quadrantClaimLock);
 	unlock(sign->laneMutexArr[laneNum]);
+	free(quadrantsNeeded);
 }
 
 void lock(pthread_mutex_t *mutex) {

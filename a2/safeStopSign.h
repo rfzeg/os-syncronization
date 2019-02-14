@@ -115,6 +115,14 @@ void freeQueue(struct IntQueue *q);
 void lock(pthread_mutex_t *mutex);
 
 /**
+* @brief Claim quadrants that this car intends to use for its action
+* @return 1 if quadrants were claimed, 0 otherwise.
+*
+* @param quadrants the quadrants the car wants to reserve
+*/
+int claimQuadrants(int *quadrants);
+
+/**
 * @brief Initializes the safe stop sign.
 *
 * @param sign pointer to the instance of SafeStopSign to be initialized.
