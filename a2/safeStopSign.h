@@ -38,13 +38,6 @@ typedef struct _SafeStopSign {
 } SafeStopSign;
 
 /**
-* @brief Locks a mutex and does error checking.
-*
-* @param mutex pointer to the mutex to lock.
-*/
-void lock(pthread_mutex_t *mutex);
-
-/**
 * @brief Claim quadrants that this car intends to use for its action
 * @return 1 if quadrants were claimed, 0 otherwise.
 *
@@ -92,17 +85,3 @@ void destroySafeStopSign(SafeStopSign* sign);
 * @param sign pointer to the stop sign intersection.
 */
 void runStopSignCar(Car* car, SafeStopSign* sign);
-
-/**
-* @brief Destroys a mutex and does error checking.
-*
-* @param mutex pointer to the mutex to initialize.
-*/
-void destroyMutex(pthread_mutex_t* mutex);
-
-/**
-* @brief Destroys a condition variable and does error checking.
-*
-* @param cond pointer to the condition variable to initialize.
-*/
-void destroyConditionVariable(pthread_cond_t* cond);

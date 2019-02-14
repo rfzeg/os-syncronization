@@ -5,32 +5,10 @@
 * submission code.
 */
 #include "safeStopSign.h"
+#include "syncUtils.h"
 
 int quadrantClaims[4] = {-1, -1, -1, -1}; // -1 if the quadrant is not claimed, set to carIndex if claimed
 
-void lock(pthread_mutex_t *mutex) {
-	int returnValue = pthread_mutex_lock(mutex);
-	if (returnValue != 0) {
-		perror("Mutex lock failed."
-			   "@ " __FILE__ " : " LINE_STRING "\n");
-	}
-}
-
-void destroyMutex(pthread_mutex_t* mutex) {
-	int returnValue = pthread_mutex_destroy(mutex);
-	if (returnValue != 0) {
-		perror("Mutex destruction failed."
-				"@ " __FILE__ " : " LINE_STRING "\n");	
-	}
-}
-
-void destroyConditionVariable(pthread_cond_t* cond) {
-	int returnValue = pthread_cond_destroy(cond);
-	if (returnValue != 0) {
-		perror("Condition variable destruction failed."
-				"@ " __FILE__ " : " LINE_STRING "\n");	
-	}
-}
 void initSafeStopSign(SafeStopSign* sign, int count) {
 	initStopSign(&sign->base, count);
 
@@ -39,11 +17,8 @@ void initSafeStopSign(SafeStopSign* sign, int count) {
 	for (i = 0; i < QUADRANT_COUNT; i++){
 		initMutex(&sign->laneMutexArr[i]);
 		initConditionVariable(&sign->laneCondVarArr[i]);
-
 	}
 	initMutex(&sign->quadrantClaimLock);
-
-
 }
 
 void destroySafeStopSign(SafeStopSign* sign) {
