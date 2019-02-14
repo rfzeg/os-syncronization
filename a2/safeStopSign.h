@@ -32,7 +32,7 @@ typedef struct _SafeStopSign {
 	pthread_mutex_t eLock;
 	pthread_mutex_t wLock;
 
-	pthread_mutex_t reservationLock; // only one thread should be able to make reservations at a time
+	pthread_mutex_t quadrantClaimLock; // only one thread should be able to make reservations at a time
 
 	pthread_cond_t northLaneCV;
 	pthread_cond_t southLaneCV;
@@ -106,6 +106,13 @@ int dequeue(struct IntQueue *q);
  * @param q the queue to free
  */
 void freeQueue(struct IntQueue *q);
+
+/**
+* @brief Locks a mutex and does error checking.
+*
+* @param mutex pointer to the mutex to lock.
+*/
+void lock(pthread_mutex_t *mutex);
 
 /**
 * @brief Initializes the safe stop sign.

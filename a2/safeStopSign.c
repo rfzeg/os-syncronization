@@ -6,7 +6,7 @@
 */
 #include "safeStopSign.h"
 
-int quadrantReservations[4] = {-1, -1, -1, -1}; // -1 if the quadrant is not reserved, set to carIndex if reserved
+int quadrantClaims[4] = {-1, -1, -1, -1}; // -1 if the quadrant is not claimed, set to carIndex if claimed
 
 IntQueue_t *initIntQueue(){
 	IntQueue_t *int_queue = malloc(sizeof(IntQueue_t));
@@ -125,29 +125,31 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 	int quadrantCount = getStopSignRequiredQuadrants(car,quadrantsNeeded);
 	EntryLane* lane = getLane(car, &sign->base);
 	laneNum = car->position;
-	int laneRet = pthread_mutex_lock(sign->laneMutexArr[laneNum]);
-	if (laneRet != 0){
-		perror("Mutex lock failed."
-				"@ " __FILE__ " : " LINE_STRING "\n");
-	}
+
+	lock(sign->laneMutexArr[laneNum]);
 	enterLane(car, lane);
 	enqueue(sign->laneQueues[laneNum], car->index);
-	
-	int quadRet = pthread_mutex_lock(&sign->quadrantLock);
-	if (quadRet != 0){
-		perror("Mutex lock failed."
-				"@ " __FILE__ " : " LINE_STRING "\n");
-	}
+
+	lock(&sign->quadrantClaimLock);
 
 	for (int i = 0; i < quadrantCount; i++){
-		quadrants[quadrantsNeeded[i]] = car->index;
+		quadrantClaims[quadrantsNeeded[i]] = car->index;
 	}
+
 	goThroughStopSign(car, &sign->base);
 	exitCar = dequeue(sign->laneQueues[laneNum]);
 	exitIntersection(car, lane);
 	for (int i = 0; i < quadrantCount; i++){
-		quadrants[quadrantsNeeded[i]] = -1;
+		quadrantClaims[quadrantsNeeded[i]] = -1;
 	}
-	unlock(&sign->quadrantLock);
+	unlock(&sign->quadrantClaimLock);
 	unlock(sign->laneMutexArr[laneNum]);
+}
+
+void lock(pthread_mutex_t *mutex) {
+	int returnValue = pthread_mutex_lock(mutex);
+	if (returnValue != 0) {
+		perror("Mutex lock failed."
+			   "@ " __FILE__ " : " LINE_STRING "\n");
+	}
 }
