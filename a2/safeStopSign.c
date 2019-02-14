@@ -119,22 +119,19 @@ void destroySafeStopSign(SafeStopSign* sign) {
 int claimQuadrants(SafeStopSign* sign, int *quadrants, int numClaims, int carIndex) {
 	int quadrantsClaimSuccessful = 1;
 	// NOTE: UPDATE THIS TO USE THE QUEUE OR LINKEDLIST
-	int passedIndexesArr[4] = {-1, -1, -1, -1};
-	int passedIndexesArrPtr = 0;
-
 	printf("bitch 1\n");
 
 	for (int i = 0; i < numClaims; i++) {
 		if (quadrantClaims[quadrants[i]] == -1) {
 			quadrantClaims[quadrants[i]] = carIndex;
-			passedIndexesArr[passedIndexesArrPtr] = quadrants[i];
-			passedIndexesArrPtr++;
 		} else {
 			// quadrant is being used by another car
 			quadrantsClaimSuccessful = 0;
+
+			// reset all the quadrants we may have changed earlier
 			for (int i = 0; i < 4; i++) {
-				if (passedIndexesArr[i] != -1) {
-					quadrantClaims[passedIndexesArr[i]] = -1;
+				if (quadrantClaims[i] == carIndex) {
+					quadrantClaims[i] = -1;
 				}
 			}
 			break;
@@ -173,7 +170,7 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 
 	lock(&sign->quadrantClaimLock);
 	while (!claimQuadrants(sign, quadrantsNeeded, quadrantsNeededCount, car->index)) {
-		pthread_cond_wait(sign->laneCondVarArr[laneNum], sign->laneMutexArr[laneNum]);
+		pthread_cond_wait(sign->laneCondVarArr[laneNum], &sign->quadrantClaimLock);
 	}
 	unlock(&sign->quadrantClaimLock);
 
