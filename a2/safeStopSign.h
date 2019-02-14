@@ -112,7 +112,7 @@ void freeQueue(struct IntQueue *q);
 *
 * @param mutex pointer to the mutex to lock.
 */
-void lock(pthread_mutex_t *mutex);
+void lock(pthread_mutex_t *mutex, int lock_num);
 
 /**
 * @brief Claim quadrants that this car intends to use for its action

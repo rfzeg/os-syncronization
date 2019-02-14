@@ -65,6 +65,7 @@ void initSafeStopSign(SafeStopSign* sign, int count) {
 	initMutex(&sign->sLock);
 	initMutex(&sign->eLock);
 	initMutex(&sign->wLock);
+	initMutex(&sign->quadrantClaimLock);
 
 	initConditionVariable(&sign->northLaneCV);
 	initConditionVariable(&sign->southLaneCV);
@@ -105,6 +106,8 @@ void destroySafeStopSign(SafeStopSign* sign) {
 	pthread_cond_destroy(&sign->southLaneCV);
 	pthread_cond_destroy(&sign->eastLaneCV);
 	pthread_cond_destroy(&sign->westLaneCV);
+
+	pthread_mutex_destroy(&sign->quadrantClaimLock);
 
 	pthread_mutex_destroy(&sign->nLock);
 	pthread_mutex_destroy(&sign->sLock);
@@ -159,13 +162,13 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 	laneNum = car->position;
 
 	// Only one car should enter a lane at a time
-	lock(sign->laneMutexArr[laneNum]);
+	lock(sign->laneMutexArr[laneNum], 1);
 	enterLane(car, lane);
 	enqueue(sign->laneQueues[laneNum], car->index);
 	unlock(sign->laneMutexArr[laneNum]);
 
 	// Only one car should be able to 'claim' quadrants it needs to make an action (ie. modify our quadrantClaims arr)
-	lock(&sign->quadrantClaimLock);
+	lock(&sign->quadrantClaimLock, 2);
 	// The car should claim all the quadrants it needs (no one else can be using it)
 	while (!claimQuadrants(sign, quadrantsNeeded, quadrantsNeededCount, car->index)) {
 		pthread_cond_wait(sign->laneCondVarArr[laneNum], &sign->quadrantClaimLock);
@@ -174,7 +177,7 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 
 	goThroughStopSign(car, &sign->base);
 
-	lock(&sign->quadrantClaimLock);
+	lock(&sign->quadrantClaimLock, 3);
 	unclaimQuadrants(sign, car->index);
 	unlock(&sign->quadrantClaimLock);
 
@@ -182,7 +185,7 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 	broadcastAllLanes(sign);
 
 	// Only one car should be able to leave a lane at a time.
-	lock(sign->laneMutexArr[laneNum]);
+	lock(sign->laneMutexArr[laneNum], 4);
 	// The car that is leaving the intersection should be the car at the front of its corresponding lane queue
 	// ie the cars should leave in the order in which they arrived
 	while(sign->laneQueues[laneNum]->size > 0 && car->index != sign->laneQueues[laneNum]->head->val){
@@ -190,16 +193,22 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 	}
 	exitIntersection(car, lane);
 	dequeue(sign->laneQueues[laneNum]);
-	pthread_cond_broadcast(sign->laneCondVarArr[laneNum]);
+	broadcastAllLanes(sign);
 	unlock(sign->laneMutexArr[laneNum]);
 
 	free(quadrantsNeeded);
 }
 
-void lock(pthread_mutex_t *mutex) {
+void lock(pthread_mutex_t *mutex, int lock_num) {
 	int returnValue = pthread_mutex_lock(mutex);
 	if (returnValue != 0) {
 		perror("Mutex lock failed."
 			   "@ " __FILE__ " : " LINE_STRING "\n");
+		printf("\nFAILED WITH: lock num %d\n", lock_num);
+
+
+	} else {
+		printf("\nPASSED WITH: lock num %d\n", lock_num);
+
 	}
 }
