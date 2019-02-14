@@ -124,7 +124,7 @@ int claimQuadrants(int *quadrants) {
 
 void runStopSignCar(Car* car, SafeStopSign* sign) {
 	// TODO: Add your synchronization logic to this function.
-	int laneNum, exitCar, carAction;
+	int laneNum, exitCar;
 
 	int quadrantsNeeded = malloc(sizeof(int) * QUADRANT_COUNT);
 	int quadrantCount = getStopSignRequiredQuadrants(car,quadrantsNeeded);
@@ -140,10 +140,19 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 	for (int i = 0; i < quadrantCount; i++){
 		quadrantClaims[quadrantsNeeded[i]] = car->index;
 	}
+	unlock(&sign->quadrantClaimLock);
 
 	goThroughStopSign(car, &sign->base);
 	exitCar = dequeue(sign->laneQueues[laneNum]);
+
+	// Ensures cars who entered lane first exits first
+	while(car->index != exitCar){
+		pthread_cond_wait(sign->laneCondVarArr[laneNum], sign->laneMutexArr[laneNum]);
+	}
 	exitIntersection(car, lane);
+	pthread_cond_broadcast(sign->laneCondVarArr[laneNum]);
+
+	lock(&sign->quadrantClaimLock);
 	for (int i = 0; i < quadrantCount; i++){
 		quadrantClaims[quadrantsNeeded[i]] = -1;
 	}
