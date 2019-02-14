@@ -129,10 +129,10 @@ int claimQuadrants(SafeStopSign* sign, int *quadrants, int numClaims, int carInd
  * Unclaim the quadrants currently reserved by the car
  *
  * @param sign the stop sign
- * @param quadrantsClaimed the quadrants that this car currently reserves
- * @param numClaims number of quadrants this car currently reserves (quadrantsClaimed.length)
+ * @param carIndex the index of the car to remove reservations from
  */
-void unclaimQuadrants(SafeStopSign* sign, int *quadrantsClaimed, int numClaims);
+
+void unclaimQuadrants(SafeStopSign* sign, int carIndex);
 
 /**
  * Wake up cars that are waiting so they can check

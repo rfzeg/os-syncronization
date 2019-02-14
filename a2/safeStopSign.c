@@ -126,12 +126,8 @@ int claimQuadrants(SafeStopSign* sign, int *quadrants, int numClaims, int carInd
 			// quadrant is being used by another car
 			quadrantsClaimSuccessful = 0;
 
-			// Reset all the quadrants we may have changed earlier
-			for (int i = 0; i < QUADRANT_COUNT; i++) {
-				if (quadrantClaims[i] == carIndex) {
-					quadrantClaims[i] = -1;
-				}
-			}
+			// Reset all the quadrants we may have claimed before discovering that quadrantClaims[i] is being used
+			unclaimQuadrants(sign, carIndex);
 			break;
 		}
 	}
@@ -139,15 +135,11 @@ int claimQuadrants(SafeStopSign* sign, int *quadrants, int numClaims, int carInd
 	return quadrantsClaimSuccessful;
 }
 
-//void unclaimQuadrants(SafeStopSign* sign, int *quadrantsClaimed, int numClaims) {
-//	for (int i = 0; i < numClaims; i++){
-//		quadrantClaims[quadrantsClaimed[i]] = -1;
-//	}
-//}
-
-void unclaimQuadrants(SafeStopSign* sign, int *quadrantsClaimed, int numClaims) {
-	for (int i = 0; i < numClaims; i++){
-		quadrantClaims[quadrantsClaimed[i]] = -1;
+void unclaimQuadrants(SafeStopSign* sign, int carIndex) {
+	for (int i = 0; i < QUADRANT_COUNT; i++){
+		if (quadrantClaims[i] == carIndex) { // if the car is currently reserving quadrant i, unreserve it
+			quadrantClaims[i] = -1;
+		}
 	}
 }
 
@@ -183,7 +175,7 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 	goThroughStopSign(car, &sign->base);
 
 	lock(&sign->quadrantClaimLock);
-	unclaimQuadrants(sign, quadrantsNeeded, quadrantsNeededCount);
+	unclaimQuadrants(sign, car->index);
 	unlock(&sign->quadrantClaimLock);
 
 	// new quadrants have been freed up. wake up all car threads and tell them to re-check if they can claimQuadrants
