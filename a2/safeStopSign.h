@@ -39,10 +39,6 @@ typedef struct _SafeStopSign {
 	pthread_cond_t eastLaneCV;
 	pthread_cond_t westLaneCV;
 
-    struct IntQueue *northQueue;
-    struct IntQueue *southQueue;
-    struct IntQueue *eastQueue;
-    struct IntQueue *westQueue;
 
     // An array to hold mutexes corresponding to each lane
 	pthread_mutex_t **laneMutexArr;
@@ -50,69 +46,14 @@ typedef struct _SafeStopSign {
     // An array to hold condition variables corresponding to each lane
 	pthread_cond_t **laneCondVarArr;
 
-	struct IntQueue **laneQueues;
-
-
 } SafeStopSign;
-
-
-
-
-/**
- * A node that forms one element of our IntQueue. Has a value, and a pointer to the next node
- */
-struct IntQueueNode {
-    int val;
-    struct IntQueueNode *next;
-};
-
-/**
- * A queue data structure that holds integers
- */
-struct IntQueue {
-    struct IntQueueNode *head;
-    struct IntQueueNode *tail;
-    int size;
-};
-
-typedef struct IntQueue IntQueue_t;
-typedef struct IntQueueNode IntQueueNode_t;
-
-/**
- * Allocate memory and start values for a new IntQueue
- *
- * @return a pointer to the newly created IntQueue
- */
-struct IntQueue *initIntQueue();
-
-/**
- * Add integer i to the end of queue q
- *
- * @param q the queue
- * @param i the integer
- */
-void enqueue(struct IntQueue *q, int i);
-
-/**
- * Remove and return the first element of the queue
- *
- * @param q the queue to operate on
- */
-int dequeue(struct IntQueue *q);
-
-/**
- * Free all memory allocated by queue q and its elements
- *
- * @param q the queue to free
- */
-void freeQueue(struct IntQueue *q);
 
 /**
 * @brief Locks a mutex and does error checking.
 *
 * @param mutex pointer to the mutex to lock.
 */
-void lock(pthread_mutex_t *mutex, int lock_num);
+void lock(pthread_mutex_t *mutex);
 
 /**
 * @brief Claim quadrants that this car intends to use for its action
@@ -162,3 +103,17 @@ void destroySafeStopSign(SafeStopSign* sign);
 * @param sign pointer to the stop sign intersection.
 */
 void runStopSignCar(Car* car, SafeStopSign* sign);
+
+/**
+* @brief Destroys a mutex and does error checking.
+*
+* @param mutex pointer to the mutex to initialize.
+*/
+void destroyMutex(pthread_mutex_t* mutex);
+
+/**
+* @brief Destroys a condition variable and does error checking.
+*
+* @param cond pointer to the condition variable to initialize.
+*/
+void destroyConditionVariable(pthread_cond_t* cond);
