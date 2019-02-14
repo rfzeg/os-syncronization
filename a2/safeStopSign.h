@@ -32,7 +32,7 @@ typedef struct _SafeStopSign {
 	pthread_mutex_t eLock;
 	pthread_mutex_t wLock;
 
-	pthread_mutex_t laneLock;
+	pthread_mutex_t reservationLock; // only one thread should be able to make reservations at a time
 
 	pthread_cond_t northLaneCV;
 	pthread_cond_t southLaneCV;
