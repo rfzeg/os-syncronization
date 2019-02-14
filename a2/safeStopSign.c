@@ -110,6 +110,10 @@ void destroySafeStopSign(SafeStopSign* sign) {
 	pthread_mutex_destroy(&sign->sLock);
 	pthread_mutex_destroy(&sign->eLock);
 	pthread_mutex_destroy(&sign->wLock);
+
+	free(sign->laneMutexArr);
+	free(sign->laneCondVarArr);
+	free(sign->laneQueues);
 }
 
 
@@ -117,22 +121,33 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 	// TODO: Add your synchronization logic to this function.
 	int laneNum, exitCar, carAction;
 
-	int quadrantsNeeded[3] = {0,0,0};
+	int quadrantsNeeded[QUADRANT_COUNT];
 	int quadrantCount = getStopSignRequiredQuadrants(car,quadrantsNeeded);
 	EntryLane* lane = getLane(car, &sign->base);
 	laneNum = car->position;
-	carAction = car->action;
-	int ret = pthread_mutex_lock(sign->laneMutexArr[laneNum]);
-	if (ret != 0){
+	int laneRet = pthread_mutex_lock(sign->laneMutexArr[laneNum]);
+	if (laneRet != 0){
 		perror("Mutex lock failed."
 				"@ " __FILE__ " : " LINE_STRING "\n");
 	}
 	enterLane(car, lane);
 	enqueue(sign->laneQueues[laneNum], car->index);
 	
+	int quadRet = pthread_mutex_lock(&sign->quadrantLock);
+	if (quadRet != 0){
+		perror("Mutex lock failed."
+				"@ " __FILE__ " : " LINE_STRING "\n");
+	}
+
+	for (int i = 0; i < quadrantCount; i++){
+		quadrants[quadrantsNeeded[i]] = car->index;
+	}
 	goThroughStopSign(car, &sign->base);
 	exitCar = dequeue(sign->laneQueues[laneNum]);
 	exitIntersection(car, lane);
-
+	for (int i = 0; i < quadrantCount; i++){
+		quadrants[quadrantsNeeded[i]] = -1;
+	}
+	unlock(&sign->quadrantLock);
 	unlock(sign->laneMutexArr[laneNum]);
 }
