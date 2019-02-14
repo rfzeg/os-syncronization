@@ -6,7 +6,7 @@
 */
 #include "safeStopSign.h"
 
-int quadrants[4] = {0,0,0,0};
+int quadrantReservations[4] = {-1, -1, -1, -1}; // -1 if the quadrant is not reserved, set to carIndex if reserved
 
 IntQueue_t *initIntQueue(){
 	IntQueue_t *int_queue = malloc(sizeof(IntQueue_t));
