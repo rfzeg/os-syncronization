@@ -24,8 +24,39 @@ typedef struct _SafeTrafficLight {
 	* you have been provided.
 	*/
 	TrafficLight base;
-
 	// TODO: Add any members you need for synchronization here.
+	pthread_mutex_t eastStraightLock;
+	pthread_mutex_t eastLeftLock;
+	pthread_mutex_t eastRightLock;
+
+	pthread_mutex_t southStraightLock;
+	pthread_mutex_t southLeftLock;
+	pthread_mutex_t southRightLock;
+
+	pthread_mutex_t westStraightLock;
+	pthread_mutex_t westLeftLock;
+	pthread_mutex_t westRightLock;
+
+	pthread_mutex_t northStraightLock;
+	pthread_mutex_t northLeftLock;
+	pthread_mutex_t northRightLock;
+
+	pthread_cond_t eastStraightCV;
+	pthread_cond_t eastLeftCV;
+	pthread_cond_t eastRightCV;
+
+	pthread_cond_t southStraightCV;
+	pthread_cond_t southLeftCV;
+	pthread_cond_t southRightCV;
+
+	pthread_cond_t westStraightCV;
+	pthread_cond_t westLeftCV;
+	pthread_cond_t westRightCV;
+
+	pthread_cond_t northStraightCV;
+	pthread_cond_t northLeftCV;
+	pthread_cond_t northRightCV;
+
 
 } SafeTrafficLight;
 
