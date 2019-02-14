@@ -169,6 +169,7 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 	broadcastAllLanes(sign);
 	unlock(&sign->quadrantClaimLock);
 
+	lock(sign->laneMutexArr[laneNum]);
 	// Ensures cars who entered lane first exits first
 	while(sign->laneQueues[laneNum]->size > 0 && car->index != sign->laneQueues[laneNum]->head->val){
 		pthread_cond_wait(sign->laneCondVarArr[laneNum], sign->laneMutexArr[laneNum]);
@@ -176,6 +177,7 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 	exitIntersection(car, lane);
 	dequeue(sign->laneQueues[laneNum]);
 	pthread_cond_broadcast(sign->laneCondVarArr[laneNum]);
+	unlock(sign->laneMutexArr[laneNum]);
 
 	free(quadrantsNeeded);
 }
