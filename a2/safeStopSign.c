@@ -117,18 +117,32 @@ void destroySafeStopSign(SafeStopSign* sign) {
 }
 
 int claimQuadrants(SafeStopSign* sign, int *quadrants, int numClaims, int carIndex) {
-	int quadrantsClaimed = 1;
+	int quadrantsClaimSuccessful = 1;
+	// NOTE: UPDATE THIS TO USE THE QUEUE OR LINKEDLIST
+	int passedIndexesArr[4] = {-1, -1, -1, -1};
+	int passedIndexesArrPtr = 0;
+
+	printf("bitch 1\n");
 
 	for (int i = 0; i < numClaims; i++) {
 		if (quadrantClaims[quadrants[i]] == -1) {
 			quadrantClaims[quadrants[i]] = carIndex;
+			passedIndexesArr[passedIndexesArrPtr] = quadrants[i];
+			passedIndexesArrPtr++;
 		} else {
 			// quadrant is being used by another car
-			quadrantsClaimed = 0;
+			quadrantsClaimSuccessful = 0;
+			for (int i = 0; i < 4; i++) {
+				if (passedIndexesArr[i] != -1) {
+					quadrantClaims[passedIndexesArr[i]] = -1;
+				}
+			}
 			break;
 		}
 	}
-	return quadrantsClaimed;
+	printf("bitch 2\n");
+
+	return quadrantsClaimSuccessful;
 }
 
 void unclaimQuadrants(SafeStopSign* sign, int *quadrantsClaimed, int numClaims) {
