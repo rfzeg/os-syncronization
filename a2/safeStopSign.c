@@ -116,11 +116,11 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 
 	lock(&sign->quadrantClaimLock);
 	unclaimQuadrants(sign, car->index);
-	unlock(&sign->quadrantClaimLock);
-	
 
 	// new quadrants have been freed up. wake up all car threads and tell them to re-check if they can claimQuadrants
 	broadcastAllLanes(sign);
+	
+	unlock(&sign->quadrantClaimLock);	
 
 	exitIntersection(car, lane);
 
