@@ -71,8 +71,8 @@ void initSafeStopSign(SafeStopSign* sign, int count) {
 	initConditionVariable(&sign->eastLaneCV);
 	initConditionVariable(&sign->westLaneCV);
 
-	sign->laneMutexArr = malloc(sizeof(pthread_mutex_t) * 4);
-	sign->laneCondVarArr = malloc(sizeof(pthread_cond_t) * 4);
+	sign->laneMutexArr = malloc(sizeof(pthread_mutex_t *) * 4);
+	sign->laneCondVarArr = malloc(sizeof(pthread_cond_t *) * 4);
 
 	sign->laneMutexArr[0] = &sign->eLock;
 	sign->laneMutexArr[1] = &sign->nLock;
