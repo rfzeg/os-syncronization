@@ -119,7 +119,7 @@ void destroySafeStopSign(SafeStopSign* sign) {
 
 void runStopSignCar(Car* car, SafeStopSign* sign) {
 	// TODO: Add your synchronization logic to this function.
-	int laneNum, exitCar, carAction;
+	int laneNum, exitCar;
 
 	int quadrantsNeeded[QUADRANT_COUNT];
 	int quadrantCount = getStopSignRequiredQuadrants(car,quadrantsNeeded);
@@ -146,7 +146,7 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 	}
 	exitIntersection(car, lane);
 	pthread_cond_broadcast(sign->laneCondVarArr[laneNum]);
-	
+
 	lock(&sign->quadrantClaimLock);
 	for (int i = 0; i < quadrantCount; i++){
 		quadrantClaims[quadrantsNeeded[i]] = -1;
