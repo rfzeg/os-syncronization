@@ -27,24 +27,13 @@ typedef struct _SafeStopSign {
 
 	// TODO: Add any members you need for synchronization here.
 
-	pthread_mutex_t nLock;
-	pthread_mutex_t sLock;
-	pthread_mutex_t eLock;
-	pthread_mutex_t wLock;
-
 	pthread_mutex_t quadrantClaimLock; // only one thread should be able to make reservations at a time
 
-	pthread_cond_t northLaneCV;
-	pthread_cond_t southLaneCV;
-	pthread_cond_t eastLaneCV;
-	pthread_cond_t westLaneCV;
-
-
     // An array to hold mutexes corresponding to each lane
-	pthread_mutex_t **laneMutexArr;
+	pthread_mutex_t laneMutexArr[QUADRANT_COUNT];
 
     // An array to hold condition variables corresponding to each lane
-	pthread_cond_t **laneCondVarArr;
+	pthread_cond_t laneCondVarArr[QUADRANT_COUNT];
 
 } SafeStopSign;
 
