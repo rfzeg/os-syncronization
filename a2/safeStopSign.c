@@ -72,7 +72,7 @@ void initSafeStopSign(SafeStopSign* sign, int count) {
 	initConditionVariable(&sign->westLaneCV);
 
 	sign->laneMutexArr = malloc(sizeof(pthread_mutex_t) * 4);
-	sign->laneCondVarArr = malloc(sizeof(sign->laneCondVarArr) * 4);
+	sign->laneCondVarArr = malloc(sizeof(sign->pthread_cond_t) * 4);
 
 	sign->laneMutexArr[0] = &sign->eLock;
 	sign->laneMutexArr[1] = &sign->nLock;
@@ -118,8 +118,6 @@ void destroySafeStopSign(SafeStopSign* sign) {
 
 int claimQuadrants(SafeStopSign* sign, int *quadrants, int numClaims, int carIndex) {
 	int quadrantsClaimSuccessful = 1;
-	// NOTE: UPDATE THIS TO USE THE QUEUE OR LINKEDLIST
-	printf("bitch 1\n");
 
 	for (int i = 0; i < numClaims; i++) {
 		if (quadrantClaims[quadrants[i]] == -1) {
@@ -128,8 +126,8 @@ int claimQuadrants(SafeStopSign* sign, int *quadrants, int numClaims, int carInd
 			// quadrant is being used by another car
 			quadrantsClaimSuccessful = 0;
 
-			// reset all the quadrants we may have changed earlier
-			for (int i = 0; i < 4; i++) {
+			// Reset all the quadrants we may have changed earlier
+			for (int i = 0; i < QUADRANT_COUNT; i++) {
 				if (quadrantClaims[i] == carIndex) {
 					quadrantClaims[i] = -1;
 				}
@@ -137,10 +135,15 @@ int claimQuadrants(SafeStopSign* sign, int *quadrants, int numClaims, int carInd
 			break;
 		}
 	}
-	printf("bitch 2\n");
 
 	return quadrantsClaimSuccessful;
 }
+
+//void unclaimQuadrants(SafeStopSign* sign, int *quadrantsClaimed, int numClaims) {
+//	for (int i = 0; i < numClaims; i++){
+//		quadrantClaims[quadrantsClaimed[i]] = -1;
+//	}
+//}
 
 void unclaimQuadrants(SafeStopSign* sign, int *quadrantsClaimed, int numClaims) {
 	for (int i = 0; i < numClaims; i++){
@@ -149,7 +152,7 @@ void unclaimQuadrants(SafeStopSign* sign, int *quadrantsClaimed, int numClaims) 
 }
 
 void broadcastAllLanes(SafeStopSign* sign) {
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < QUADRANT_COUNT; i++) {
 		pthread_cond_broadcast(sign->laneCondVarArr[i]);
 	}
 }
@@ -162,26 +165,34 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 	int quadrantsNeededCount = getStopSignRequiredQuadrants(car,quadrantsNeeded);
 	EntryLane* lane = getLane(car, &sign->base);
 	laneNum = car->position;
+
+	// Only one car should enter a lane at a time
 	lock(sign->laneMutexArr[laneNum]);
 	enterLane(car, lane);
 	enqueue(sign->laneQueues[laneNum], car->index);
-
 	unlock(sign->laneMutexArr[laneNum]);
 
+	// Only one car should be able to 'claim' quadrants it needs to make an action (ie. modify our quadrantClaims arr)
 	lock(&sign->quadrantClaimLock);
+	// The car should claim all the quadrants it needs (no one else can be using it)
 	while (!claimQuadrants(sign, quadrantsNeeded, quadrantsNeededCount, car->index)) {
 		pthread_cond_wait(sign->laneCondVarArr[laneNum], &sign->quadrantClaimLock);
 	}
 	unlock(&sign->quadrantClaimLock);
 
 	goThroughStopSign(car, &sign->base);
+
 	lock(&sign->quadrantClaimLock);
 	unclaimQuadrants(sign, quadrantsNeeded, quadrantsNeededCount);
-	broadcastAllLanes(sign);
 	unlock(&sign->quadrantClaimLock);
 
+	// new quadrants have been freed up. wake up all car threads and tell them to re-check if they can claimQuadrants
+	broadcastAllLanes(sign);
+
+	// Only one car should be able to leave a lane at a time.
 	lock(sign->laneMutexArr[laneNum]);
-	// Ensures cars who entered lane first exits first
+	// The car that is leaving the intersection should be the car at the front of its corresponding lane queue
+	// ie the cars should leave in the order in which they arrived
 	while(sign->laneQueues[laneNum]->size > 0 && car->index != sign->laneQueues[laneNum]->head->val){
 		pthread_cond_wait(sign->laneCondVarArr[laneNum], sign->laneMutexArr[laneNum]);
 	}
@@ -198,8 +209,5 @@ void lock(pthread_mutex_t *mutex) {
 	if (returnValue != 0) {
 		perror("Mutex lock failed."
 			   "@ " __FILE__ " : " LINE_STRING "\n");
-	} else {
-		printf("not a retard");
 	}
-
 }
