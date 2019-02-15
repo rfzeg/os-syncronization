@@ -41,21 +41,19 @@ typedef struct _SafeStopSign {
 * @brief Claim quadrants that this car intends to use for its action
 * @return 1 if quadrants were claimed, 0 otherwise.
 *
-* @param sign the stop sign
 * @param quadrants the quadrants the car wants to reserve
 * @param numClaims the number of quadrants being claimed (quadrants.length)
 * @param carIndex the index of the car making the claims
 */
-int claimQuadrants(SafeStopSign* sign, int *quadrants, int numClaims, int carIndex);
+int claimQuadrants(int *quadrants, int numClaims, int carIndex);
 
 /**
  * Unclaim the quadrants currently reserved by the car
  *
- * @param sign the stop sign
  * @param carIndex the index of the car to remove reservations from
  */
 
-void unclaimQuadrants(SafeStopSign* sign, int carIndex);
+void unclaimQuadrants(int carIndex);
 
 /**
  * Wake up cars that are waiting so they can check
