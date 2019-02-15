@@ -28,6 +28,9 @@ typedef struct _SafeTrafficLight {
 	pthread_mutex_t lockArr[TRAFFIC_LIGHT_LANE_COUNT];
 	pthread_cond_t cvArr[TRAFFIC_LIGHT_LANE_COUNT];
 
+	pthread_mutex_t trafficLightLock;
+	pthread_cond_t	trafficLightCV;
+
 } SafeTrafficLight;
 
 /**
