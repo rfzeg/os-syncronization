@@ -49,15 +49,24 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 	// enter the intersection before it needs to check for oncoming traffic.
 	lock(&light->trafficLightLock);
 
+	while (!canEnterIntersection(car, light)){
+		pthread_cond_wait(&light->cvArr[laneIndex], &light->trafficLightLock);
+	}
 	enterTrafficLight(car, &light->base);
-	
+
+	//Broadcast all lanes
+	int i;
+	for (i=0;i<TRAFFIC_LIGHT_LANE_COUNT;i++){
+		pthread_cond_broadcast(&light->cvArr[i]);
+	}
 	unlock(&light->trafficLightLock);
+
 	actTrafficLight(car, &light->base, NULL, NULL, NULL);
 
-	//peek at head of laneQueue to make sure order is maintained for each lane
+	//TODO peek at head of laneQueue to make sure order is maintained for each lane
+
 	exitIntersection(car, lane);
 	dequeue(light->intQueueArr[laneIndex]);
-
 
 	unlock(&light->lockArr[laneIndex]);
 }
@@ -76,6 +85,7 @@ int canEnterIntersection(Car* car, SafeTrafficLight* light) {
 		return 1;
 	}
 }
+
 
 // some helpers from trafficLight.c
 
