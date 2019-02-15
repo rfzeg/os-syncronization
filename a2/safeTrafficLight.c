@@ -18,7 +18,6 @@ void initSafeTrafficLight(SafeTrafficLight* light, int horizontal, int vertical)
         light->intQueueArr[i] = initIntQueue();
 	}
 	initMutex(&light->trafficLightLock);
-	initConditionVariable(&light->trafficLightCV);
 
 }
 
