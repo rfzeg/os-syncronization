@@ -33,7 +33,7 @@ void destroySafeTrafficLight(SafeTrafficLight* light) {
 		freeQueue(light->intQueueArr[i]);
 	}
 	destroyMutex(&light->trafficLightLock);
-	destroyConditionVariable(&light->trafficLightCV);
+
 }
 
 void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
