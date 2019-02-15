@@ -88,9 +88,9 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 	}
 	unlock(&sign->quadrantClaimLock);
 
-	goThroughStopSign(car, &sign->base);
-
 	lock(&sign->quadrantClaimLock);
+	
+	goThroughStopSign(car, &sign->base);
 	unclaimQuadrants(car->index);
 
 	// new quadrants have been freed up. wake up all car threads and tell them to re-check if they can claimQuadrants
