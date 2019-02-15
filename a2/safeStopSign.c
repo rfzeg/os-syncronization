@@ -34,7 +34,7 @@ void destroySafeStopSign(SafeStopSign* sign) {
 	destroyMutex(&sign->quadrantClaimLock);
 }
 
-int claimQuadrants(SafeStopSign* sign, int *quadrants, int numClaims, int carIndex) {
+int claimQuadrants(int *quadrants, int numClaims, int carIndex) {
 	int quadrantsClaimSuccessful = 1;
 
 	for (int i = 0; i < numClaims; i++) {
@@ -45,7 +45,7 @@ int claimQuadrants(SafeStopSign* sign, int *quadrants, int numClaims, int carInd
 			quadrantsClaimSuccessful = 0;
 
 			// Reset all the quadrants we may have claimed before discovering that quadrantClaims[i] is being used
-			unclaimQuadrants(sign, carIndex);
+			unclaimQuadrants(carIndex);
 			break;
 		}
 	}
@@ -53,7 +53,7 @@ int claimQuadrants(SafeStopSign* sign, int *quadrants, int numClaims, int carInd
 	return quadrantsClaimSuccessful;
 }
 
-void unclaimQuadrants(SafeStopSign* sign, int carIndex) {
+void unclaimQuadrants(int carIndex) {
 	for (int i = 0; i < QUADRANT_COUNT; i++){
 		if (quadrantClaims[i] == carIndex) { // if the car is currently reserving quadrant i, unreserve it
 			quadrantClaims[i] = -1;
@@ -82,8 +82,8 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 
 	// Only one car should be able to 'claim' quadrants it needs to make an action (ie. modify our quadrantClaims arr)
 	lock(&sign->quadrantClaimLock);
-	// The car should claim all the quadrants it needs (no one else can be using it)
-	while (!claimQuadrants(sign, quadrantsNeeded, quadrantsNeededCount, car->index)) {
+	// The car should claim all the quadrants t needs (no one else can be using it)
+	while (!claimQuadrants(quadrantsNeeded, quadrantsNeededCount, car->index)) {
 		pthread_cond_wait(&sign->laneCondVarArr[laneNum], &sign->quadrantClaimLock);
 	}
 	unlock(&sign->quadrantClaimLock);
@@ -91,7 +91,7 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 	goThroughStopSign(car, &sign->base);
 
 	lock(&sign->quadrantClaimLock);
-	unclaimQuadrants(sign, car->index);
+	unclaimQuadrants(car->index);
 
 	// new quadrants have been freed up. wake up all car threads and tell them to re-check if they can claimQuadrants
 	broadcastAllLanes(sign);
