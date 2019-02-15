@@ -62,15 +62,15 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 	unlock(&light->lockArr[laneIndex]);
 }
 
-int canEnterIntersection(Car* car, SafeTrafficLight* light){
+int canEnterIntersection(Car* car, SafeTrafficLight* light) {
 	if (car->position == 0 || car->position == 2){
-		if (getLightState(light) != 1){
+		if (getLightState(&light->base) != 1){
 			return 0;
 		}
 		return 1;
 	}
 	else{
-		if (getLightState(light) != 0){
+		if (getLightState(&light->base) != 0){
 			return 0;
 		}
 		return 1;

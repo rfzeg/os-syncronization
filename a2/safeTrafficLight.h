@@ -66,4 +66,4 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light);
  * @param car pointer to the car
  * @param light pointer to the traffic light intersection 
  */
-int canEnterIntersection(Car* car, SafeTrafficLight* light) 
+int canEnterIntersection(Car* car, SafeTrafficLight* light);
