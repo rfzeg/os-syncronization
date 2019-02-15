@@ -15,7 +15,7 @@ void initSafeTrafficLight(SafeTrafficLight* light, int horizontal, int vertical)
 	for (i=0;i<TRAFFIC_LIGHT_LANE_COUNT;i++){
 		initMutex(&light->lockArr[i]);
 		initConditionVariable(&light->cvArr[i]);
-		initIntQueue(light->intQueueArr[i]);
+        light->intQueueArr[i] = initIntQueue();
 	}
 	initMutex(&light->trafficLightLock);
 	initConditionVariable(&light->trafficLightCV);
@@ -49,11 +49,10 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 	// Enter and act are separate calls because a car turning left can first
 	// enter the intersection before it needs to check for oncoming traffic.
 	lock(&light->trafficLightLock);
-	while(getLightState == 2){
-		pthread_cond_wait(&light->trafficLightCV, &light->trafficLightLock);
-	}
+
 	enterTrafficLight(car, &light->base);
-	pthread_cond_broadcast(&light->trafficLightLock);
+	
+
 	unlock(&light->trafficLightLock);
 	actTrafficLight(car, &light->base, NULL, NULL, NULL);
 
@@ -62,8 +61,6 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 
 
 	unlock(&light->lockArr[laneIndex]);
-
-
 }
 
 // some helpers from trafficLight.c
