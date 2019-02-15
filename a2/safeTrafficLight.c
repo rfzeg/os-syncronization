@@ -15,6 +15,7 @@ void initSafeTrafficLight(SafeTrafficLight* light, int horizontal, int vertical)
 	for (i=0;i<TRAFFIC_LIGHT_LANE_COUNT;i++){
 		initMutex(&light->lockArr[i]);
 		initConditionVariable(&light->cvArr[i]);
+		initIntQueue(light->intQueueArr[i]);
 	}
 	initMutex(&light->trafficLightLock);
 	initConditionVariable(&light->trafficLightCV);
@@ -29,6 +30,7 @@ void destroySafeTrafficLight(SafeTrafficLight* light) {
 	for (i=0;i<TRAFFIC_LIGHT_LANE_COUNT;i++){
 		destroyMutex(&light->lockArr[i]);
 		destroyConditionVariable(&light->cvArr[i]);
+		freeQueue(light->intQueueArr[i]);
 	}
 	destroyMutex(&light->trafficLightLock);
 	destroyConditionVariable(&light->trafficLightCV);
@@ -42,6 +44,7 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 
 	EntryLane* lane = getLaneLight(car, &light->base);
 	enterLane(car, lane);
+	enqueue(light->intQueueArr[laneIndex], car->index);
 
 	// Enter and act are separate calls because a car turning left can first
 	// enter the intersection before it needs to check for oncoming traffic.
@@ -55,6 +58,8 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 	actTrafficLight(car, &light->base, NULL, NULL, NULL);
 
 	exitIntersection(car, lane);
+	dequeue(light->intQueueArr[laneIndex]);
+
 
 	unlock(&light->lockArr[laneIndex]);
 

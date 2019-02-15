@@ -6,6 +6,7 @@
 */
 #include "car.h"
 #include "trafficLight.h"
+// #include "syncUtils.h"
 
 /**
 * @brief Structure that you can modify as part of your solution to implement
@@ -30,6 +31,9 @@ typedef struct _SafeTrafficLight {
 
 	pthread_mutex_t trafficLightLock;
 	pthread_cond_t	trafficLightCV;
+
+	struct IntQueue *intQueueArr[TRAFFIC_LIGHT_LANE_COUNT];
+	
 
 } SafeTrafficLight;
 
