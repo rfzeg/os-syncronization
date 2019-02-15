@@ -33,6 +33,8 @@ void destroySafeTrafficLight(SafeTrafficLight* light) {
 void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 
 	// TODO: Add your synchronization logic to this function.
+	int laneIndex = getLaneIndexLight(car);
+	lock(&light->lockArr[laneIndex]);
 
 	EntryLane* lane = getLaneLight(car, &light->base);
 	enterLane(car, lane);
@@ -43,6 +45,9 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 	actTrafficLight(car, &light->base, NULL, NULL, NULL);
 
 	exitIntersection(car, lane);
+
+	unlock(&light->lockArr[laneIndex]);
+
 
 }
 
@@ -61,7 +66,4 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 // 	return light->straightCounts[position];
 // }
 
-// int getLaneIndexLight(Car* car) {
-// 	return car->position * 3 + car->action;
-// }
 
