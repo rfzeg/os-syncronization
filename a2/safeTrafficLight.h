@@ -59,3 +59,11 @@ void destroySafeTrafficLight(SafeTrafficLight* light);
 * @param light pointer to the traffic light intersection.
 */
 void runTrafficLightCar(Car* car, SafeTrafficLight* light);
+
+/**
+ * @brief Checks whether light is green for appropriate position of car
+ *
+ * @param car pointer to the car
+ * @param light pointer to the traffic light intersection 
+ */
+int canEnterIntersection(Car* car, SafeTrafficLight* light) 

@@ -51,15 +51,30 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 
 	enterTrafficLight(car, &light->base);
 	
-
 	unlock(&light->trafficLightLock);
 	actTrafficLight(car, &light->base, NULL, NULL, NULL);
 
+	//peek at head of laneQueue to make sure order is maintained for each lane
 	exitIntersection(car, lane);
 	dequeue(light->intQueueArr[laneIndex]);
 
 
 	unlock(&light->lockArr[laneIndex]);
+}
+
+int canEnterIntersection(Car* car, SafeTrafficLight* light){
+	if (car->position == 0 || car->position == 2){
+		if (getLightState(light) != 1){
+			return 0;
+		}
+		return 1;
+	}
+	else{
+		if (getLightState(light) != 0){
+			return 0;
+		}
+		return 1;
+	}
 }
 
 // some helpers from trafficLight.c
