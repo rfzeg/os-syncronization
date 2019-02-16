@@ -7,6 +7,8 @@
 #include "safeTrafficLight.h"
 #include "syncUtils.h"
 
+int rightOfWay[4] = {0,0,0,0}; // 0 , 1, 2, 3 = east, n, w, s
+
 void initSafeTrafficLight(SafeTrafficLight* light, int horizontal, int vertical) {
 	initTrafficLight(&light->base, horizontal, vertical);
 
@@ -17,7 +19,13 @@ void initSafeTrafficLight(SafeTrafficLight* light, int horizontal, int vertical)
 		initConditionVariable(&light->cvArr[i]);
         light->intQueueArr[i] = initIntQueue();
 	}
+	for(int j=0;j<2;j++) {
+		initMutex(&light->collisionLocks[j]);
+	}
 	initMutex(&light->trafficLightLock);
+	initMutex(&light->straightLock);
+
+
 
 }
 
@@ -31,8 +39,11 @@ void destroySafeTrafficLight(SafeTrafficLight* light) {
 		destroyConditionVariable(&light->cvArr[i]);
 		freeQueue(light->intQueueArr[i]);
 	}
+	for(int j=0;j<2;j++) {
+		destroyMutex(&light->collisionLocks[j]);
+	}
 	destroyMutex(&light->trafficLightLock);
-
+	destroyMutex(&light->straightLock);
 }
 
 void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
@@ -59,14 +70,53 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 	for (i=0;i<TRAFFIC_LIGHT_LANE_COUNT;i++){
 		pthread_cond_broadcast(&light->cvArr[i]);
 	}
-	unlock(&light->trafficLightLock);
+	int collisionLockIndex = car->position % 2;
+	switch (car->action) {
+		case 0: //
+			lock(&light->straightLock);
+			rightOfWay[car->position] = 1;
+			unlock(&light->straightLock);
 
-	actTrafficLight(car, &light->base, NULL, NULL, NULL);
+			unlock(&light->trafficLightLock);
+			// get the collision lock
+			lock(&light->collisionLocks[collisionLockIndex]);
 
+			actTrafficLight(car, &light->base, NULL, NULL, NULL);
+
+			unlock(&light->collisionLocks[collisionLockIndex]);
+
+			exitIntersection(car, lane);
+			dequeue(light->intQueueArr[laneIndex]);
+
+			lock(&light->straightLock);
+			rightOfWay[car->position] = 0;
+			unlock(&light->straightLock);
+
+			break;
+		case 1: // right turns
+			unlock(&light->trafficLightLock);
+			// get the collision lock
+			actTrafficLight(car, &light->base, NULL, NULL, NULL);
+
+			exitIntersection(car, lane);
+			dequeue(light->intQueueArr[laneIndex]);
+			break; // car going right. nothing to do
+		case 2: // left turn s
+			unlock(&light->trafficLightLock);
+			// get the collision lock. FOR HERE, WE MUST MAKE A CV FOR LEFT TURNS SO THEY DONT BUSY WAIT
+			lock(&light->collisionLocks[collisionLockIndex]);
+
+			actTrafficLight(car, &light->base, NULL, NULL, NULL);
+
+			unlock(&light->collisionLocks[collisionLockIndex]);
+
+			exitIntersection(car, lane);
+			dequeue(light->intQueueArr[laneIndex]);
+			break;
+		default:break;
+	}
 	//TODO peek at head of laneQueue to make sure order is maintained for each lane
 
-	exitIntersection(car, lane);
-	dequeue(light->intQueueArr[laneIndex]);
 
 	unlock(&light->lockArr[laneIndex]);
 }
@@ -85,6 +135,9 @@ int canEnterIntersection(Car* car, SafeTrafficLight* light) {
 		return 1;
 	}
 }
+
+
+
 
 
 // some helpers from trafficLight.c
