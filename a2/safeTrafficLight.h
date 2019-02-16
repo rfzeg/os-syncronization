@@ -28,11 +28,8 @@ typedef struct _SafeTrafficLight {
 	// TODO: Add any members you need for synchronization here.
 	pthread_mutex_t lockArr[TRAFFIC_LIGHT_LANE_COUNT];
 	pthread_cond_t cvArr[TRAFFIC_LIGHT_LANE_COUNT];
-
 	pthread_mutex_t trafficLightLock;
-
 	struct IntQueue *intQueueArr[TRAFFIC_LIGHT_LANE_COUNT];
-	pthread_mutex_t straightLock;
 	pthread_mutex_t  collisionLocks[2];
     pthread_cond_t collisionCVs[2];
 

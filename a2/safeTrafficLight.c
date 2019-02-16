@@ -23,7 +23,7 @@ void initSafeTrafficLight(SafeTrafficLight* light, int horizontal, int vertical)
 
 	}
 	initMutex(&light->trafficLightLock);
-	initMutex(&light->straightLock);
+	
 
 }
 
@@ -42,7 +42,7 @@ void destroySafeTrafficLight(SafeTrafficLight* light) {
 		destroyConditionVariable(&light->collisionCVs[j]);
 	}
 	destroyMutex(&light->trafficLightLock);
-	destroyMutex(&light->straightLock);
+	
 }
 
 void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
@@ -68,22 +68,19 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 	int collisionLockIndex = car->position % 2;
 	switch (car->action) {
 		case 0: // straight
-			// get the collision lock
+			// get the collision lock to block left turners when going straight
 			lock(&light->collisionLocks[collisionLockIndex]);
-
 			actTrafficLight(car, &light->base, NULL, NULL, NULL);
-
 			unlock(&light->collisionLocks[collisionLockIndex]);
-
 			break;
 		case 1: // right turns
+			// car going right. nothing to do
 			actTrafficLight(car, &light->base, NULL, NULL, NULL);
-			break; // car going right. nothing to do
-		case 2: // left turn s
-
-			lock(&light->straightLock);
+			break; 
+		case 2: // left turns
 			lock(&light->collisionLocks[collisionLockIndex]);
 			CarPosition opposite = getOppositePosition(car->position);
+			//check whether any cars going straight in the opposite direction
 			while (getStraightCount(&light->base, (int) opposite) > 0){
 				cvWait(&light->collisionCVs[collisionLockIndex], &light->collisionLocks[collisionLockIndex]);
 			}
@@ -93,22 +90,21 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
                 cvBroadcast(&light->collisionCVs[i]);
             }
             unlock(&light->collisionLocks[collisionLockIndex]);
-			unlock(&light->straightLock);
+			
             break;
 		default:
-			unlock(&light->trafficLightLock);
 			break;
 	}
     unlock(&light->trafficLightLock);
+
+	//ensure car who entered lane first also exits first -- maintains queue order
 	while(light->intQueueArr[laneIndex]->size > 0 && car->index != light->intQueueArr[laneIndex]->head->val){
 		cvWait(&light->cvArr[laneIndex], &light->lockArr[laneIndex]);
 	}
 	exitIntersection(car, lane);
 	dequeue(light->intQueueArr[laneIndex]);
-    for (int j = 0; j < 2; j++) {
-        cvBroadcast(&light->collisionCVs[j]);
-    }
-    //Broadcast all lanes
+
+    //broadcast all lanes
     for (int k=0;k<TRAFFIC_LIGHT_LANE_COUNT;k++){
         cvBroadcast(&light->cvArr[k]);
     }
@@ -117,12 +113,14 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 
 int canEnterIntersection(Car* car, SafeTrafficLight* light) {
 	if (car->position == 0 || car->position == 2){
+		//Check East-West
 		if (getLightState(&light->base) != 1){
 			return 0;
 		}
 		return 1;
 	}
 	else{
+		//Check North-South
 		if (getLightState(&light->base) != 0){
 			return 0;
 		}
