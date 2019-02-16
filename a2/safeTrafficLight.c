@@ -62,14 +62,12 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 	}
 	enterTrafficLight(car, &light->base);
 	//Broadcast all lanes
-	int i;
-	for (i=0;i<TRAFFIC_LIGHT_LANE_COUNT;i++){
+	for (int i=0;i<TRAFFIC_LIGHT_LANE_COUNT;i++){
 		cvBroadcast(&light->cvArr[i]);
 	}
 	int collisionLockIndex = car->position % 2;
 	switch (car->action) {
 		case 0: // straight
-//			unlock(&light->trafficLightLock);
 			// get the collision lock
 			lock(&light->collisionLocks[collisionLockIndex]);
 
@@ -79,11 +77,9 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 
 			break;
 		case 1: // right turns
-//			unlock(&light->trafficLightLock);
 			actTrafficLight(car, &light->base, NULL, NULL, NULL);
 			break; // car going right. nothing to do
 		case 2: // left turn s
-//			unlock(&light->trafficLightLock);
 
 			lock(&light->straightLock);
 			lock(&light->collisionLocks[collisionLockIndex]);
@@ -93,7 +89,7 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 			}
 			// after acting on traffic light, we broadcast to let them know were done
 			actTrafficLight(car, &light->base, NULL, NULL, NULL);
-            for (i = 0; i < 2; i++) {
+            for (int i = 0; i < 2; i++) {
                 cvBroadcast(&light->collisionCVs[i]);
             }
             unlock(&light->collisionLocks[collisionLockIndex]);
@@ -104,24 +100,18 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 			break;
 	}
     unlock(&light->trafficLightLock);
-
 	while(light->intQueueArr[laneIndex]->size > 0 && car->index != light->intQueueArr[laneIndex]->head->val){
 		cvWait(&light->cvArr[laneIndex], &light->lockArr[laneIndex]);
 	}
-
 	exitIntersection(car, lane);
 	dequeue(light->intQueueArr[laneIndex]);
-//	cvBroadcast(&light->cvArr[laneIndex]);
-
-    for (i = 0; i < 2; i++) {
-        cvBroadcast(&light->collisionCVs[i]);
+    for (int j = 0; j < 2; j++) {
+        cvBroadcast(&light->collisionCVs[j]);
     }
-
     //Broadcast all lanes
-    for (i=0;i<TRAFFIC_LIGHT_LANE_COUNT;i++){
-        cvBroadcast(&light->cvArr[i]);
+    for (int k=0;k<TRAFFIC_LIGHT_LANE_COUNT;k++){
+        cvBroadcast(&light->cvArr[k]);
     }
-
 	unlock(&light->lockArr[laneIndex]);
 }
 
