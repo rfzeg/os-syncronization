@@ -39,13 +39,11 @@ typedef struct _SafeTrafficLight {
 	 * Index 0 holds the lock for cars on the E/W sides, and index 1 holds the lock for cars on the N/S sides
 	 */
 	pthread_mutex_t  collisionLocks[2];
-
 	/**
 	 * @brief Collision CVs to be used in conjunction with collision locks above, to ensure that cars wanting to turn
 	 * left won't be polling (since its inefficient)
 	 */
     pthread_cond_t collisionCVs[2];
-
 } SafeTrafficLight;
 
 /**
