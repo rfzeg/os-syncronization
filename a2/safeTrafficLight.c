@@ -23,10 +23,8 @@ void initSafeTrafficLight(SafeTrafficLight* light, int horizontal, int vertical)
 
 	}
 	initMutex(&light->trafficLightLock);
-	
 
 }
-
 void destroySafeTrafficLight(SafeTrafficLight* light) {
 	destroyTrafficLight(&light->base);
 
