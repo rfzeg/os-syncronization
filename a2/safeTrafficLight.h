@@ -33,7 +33,20 @@ typedef struct _SafeTrafficLight {
 
 	struct IntQueue *intQueueArr[TRAFFIC_LIGHT_LANE_COUNT];
 	pthread_mutex_t straightLock;
+
+	/**
+	 * @brief A collision lock prevents collisions between cars going straight and cars turning left. A car going
+	 * straight has right of way, and they acquire the lock and go. If no cars are going straight, a car turning left
+	 * can acquire the collision lock and turn left. The cars cannot move through the intersection without it.
+	 *
+	 * Index 0 holds the lock for cars on the E/W sides, and index 1 holds the lock for cars on the N/S sides
+	 */
 	pthread_mutex_t  collisionLocks[2];
+
+	/**
+	 * @brief Collision CVs to be used in conjunction with collision locks above, to ensure that cars wanting to turn
+	 * left won't be polling (since its inefficient)
+	 */
     pthread_cond_t collisionCVs[2];
 
 
