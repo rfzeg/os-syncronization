@@ -34,7 +34,8 @@ typedef struct _SafeTrafficLight {
 	struct IntQueue *intQueueArr[TRAFFIC_LIGHT_LANE_COUNT];
 	pthread_mutex_t straightLock;
 	pthread_mutex_t  collisionLocks[2];
-	
+    pthread_cond_t collisionCVs[2];
+
 
 } SafeTrafficLight;
 
