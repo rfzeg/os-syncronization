@@ -69,3 +69,18 @@ int dequeue(struct IntQueue *q);
  * @param q the queue to free
  */
 void freeQueue(struct IntQueue *q);
+
+/**
+* @brief Calls cv wait and performs error checking
+*
+* @param cond pointer to the cv.
+* @param lock pointer to lock
+*/
+void cvWait(pthread_cond_t *cond, pthread_mutex_t *lock);
+
+/**
+* @brief Calls broadcast on cv and performs error checking
+*
+* @param cond pointer to the cv
+*/
+void cvBroadcast(pthread_cond_t *cond);

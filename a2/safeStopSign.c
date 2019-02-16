@@ -63,7 +63,7 @@ void unclaimQuadrants(int carIndex) {
 
 void broadcastAllLanes(SafeStopSign* sign) {
 	for (int i = 0; i < QUADRANT_COUNT; i++) {
-		pthread_cond_broadcast(&sign->laneCondVarArr[i]);
+		cvBroadcast(&sign->laneCondVarArr[i]);
 	}
 }
 
@@ -84,7 +84,7 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 	lock(&sign->quadrantClaimLock);
 	// The car should claim all the quadrants t needs (no one else can be using it)
 	while (!claimQuadrants(quadrantsNeeded, quadrantsNeededCount, car->index)) {
-		pthread_cond_wait(&sign->laneCondVarArr[laneNum], &sign->quadrantClaimLock);
+		cvWait(&sign->laneCondVarArr[laneNum], &sign->quadrantClaimLock);
 	}
 	unlock(&sign->quadrantClaimLock);
 

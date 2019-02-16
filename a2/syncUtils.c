@@ -24,6 +24,22 @@ void destroyConditionVariable(pthread_cond_t* cond) {
     }
 }
 
+void cvWait(pthread_cond_t* cond, pthread_mutex_t* lock){
+	int returnValue = pthread_cond_wait(cond, lock);
+	if (returnValue != 0) {
+        perror("Condition variable wait failed."
+               "@ " __FILE__ " : " LINE_STRING "\n");
+    }
+	
+}
+void cvBroadcast(pthread_cond_t* cond){
+	int returnValue = pthread_cond_broadcast(cond);
+	if (returnValue != 0) {
+        perror("Condition variable broadcast failed."
+               "@ " __FILE__ " : " LINE_STRING "\n");
+    }
+}
+
 IntQueue_t *initIntQueue(){
 	IntQueue_t *int_queue = malloc(sizeof(IntQueue_t));
 	int_queue->head = NULL;
