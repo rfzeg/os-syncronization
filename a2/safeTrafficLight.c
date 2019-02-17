@@ -61,16 +61,8 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 	broadcastMultipleLanes(light->laneQueueCVs, TRAFFIC_LIGHT_LANE_COUNT);
 
 	int collisionLockIndex = car->position % 2;
-	switch (car->action) {
-		case 0: // straight
-			// get the collision lock to block left turners when going straight
-			actTrafficLight(car, &light->base, NULL, NULL, NULL);
-			break;
-		case 1: // right turns
-			// car going right. nothing to do
-			actTrafficLight(car, &light->base, NULL, NULL, NULL);
-			break; 
-		case 2: // left turns
+
+	if (car->action == LEFT_TURN){
 			lock(&light->collisionLocks[collisionLockIndex]);
 			CarPosition opposite = getOppositePosition(car->position);
 
@@ -78,17 +70,11 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 			while (getStraightCount(&light->base, (int) opposite) > 0){
 				cvWait(&light->collisionCVs[collisionLockIndex], &light->collisionLocks[collisionLockIndex]);
 			}
-
-			// after acting on traffic light, we broadcast to let them know were done
-			actTrafficLight(car, &light->base, NULL, NULL, NULL);
-            broadcastMultipleLanes(light->collisionCVs, 2);
             unlock(&light->collisionLocks[collisionLockIndex]);
-
-            break;
-		default:
-			break;
 	}
 
+	actTrafficLight(car, &light->base, NULL, NULL, NULL);
+	broadcastMultipleLanes(light->collisionCVs, 2);
     unlock(&light->trafficLightLock);
 
 	//ensure car who entered lane first also exits first -- maintains queue order
