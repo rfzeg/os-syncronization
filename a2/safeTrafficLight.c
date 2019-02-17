@@ -70,11 +70,12 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 			while (getStraightCount(&light->base, (int) opposite) > 0){
 				cvWait(&light->collisionCVs[collisionLockIndex], &light->collisionLocks[collisionLockIndex]);
 			}
+			broadcastMultipleLanes(light->collisionCVs, 2);
+
             unlock(&light->collisionLocks[collisionLockIndex]);
 	}
 
 	actTrafficLight(car, &light->base, NULL, NULL, NULL);
-	broadcastMultipleLanes(light->collisionCVs, 2);
     unlock(&light->trafficLightLock);
 
 	//ensure car who entered lane first also exits first -- maintains queue order
