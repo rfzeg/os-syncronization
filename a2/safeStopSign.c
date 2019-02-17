@@ -73,16 +73,17 @@ void runStopSignCar(Car* car, SafeStopSign* sign) {
 	while (!claimQuadrants(quadrantsNeeded, quadrantsNeededCount, car->index)) {
 		cvWait(&sign->laneCVs[laneNum], &sign->quadrantClaimLock);
 	}
-	unlock(&sign->quadrantClaimLock);
-	lock(&sign->quadrantClaimLock);
-	
+
 	goThroughStopSign(car, &sign->base);
 	unclaimQuadrants(car->index);
+
 	// new quadrants have been freed up. wake up all car threads and tell them to re-check if they can claimQuadrants
 	broadcastMultipleLanes(sign->laneCVs, QUADRANT_COUNT);
 	
 	unlock(&sign->quadrantClaimLock);	
+
 	exitIntersection(car, lane);
+
 	//as we lock the lane until the car exits, we ensure order of cars who exit
 	unlock(&sign->laneMutexes[laneNum]);
 

@@ -10,7 +10,6 @@
 void initSafeTrafficLight(SafeTrafficLight* light, int horizontal, int vertical) {
 	initTrafficLight(&light->base, horizontal, vertical);
 
-	// TODO: Add any initialization logic you need.
 	int i;
 	for (i=0;i<TRAFFIC_LIGHT_LANE_COUNT;i++){
 		initMutex(&light->laneQueueLocks[i]);
@@ -25,10 +24,10 @@ void initSafeTrafficLight(SafeTrafficLight* light, int horizontal, int vertical)
 	initMutex(&light->trafficLightLock);
 
 }
+
 void destroySafeTrafficLight(SafeTrafficLight* light) {
 	destroyTrafficLight(&light->base);
 
-	// TODO: Add any logic you need to free data structures
 	int i;
 	for (i=0;i < TRAFFIC_LIGHT_LANE_COUNT;i++){
 		destroyMutex(&light->laneQueueLocks[i]);
@@ -40,11 +39,9 @@ void destroySafeTrafficLight(SafeTrafficLight* light) {
 		destroyConditionVariable(&light->collisionCVs[i]);
 	}
 	destroyMutex(&light->trafficLightLock);
-	
 }
 
 void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
-	// TODO: Add your synchronization logic to this function.
 	int laneIndex = getLaneIndexLight(car);
 
 	lock(&light->laneQueueLocks[laneIndex]);
@@ -78,10 +75,12 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 		case 2: // left turns
 			lock(&light->collisionLocks[collisionLockIndex]);
 			CarPosition opposite = getOppositePosition(car->position);
+
 			//check whether any cars going straight in the opposite direction
 			while (getStraightCount(&light->base, (int) opposite) > 0){
 				cvWait(&light->collisionCVs[collisionLockIndex], &light->collisionLocks[collisionLockIndex]);
 			}
+
 			// after acting on traffic light, we broadcast to let them know were done
 			actTrafficLight(car, &light->base, NULL, NULL, NULL);
 			broadcastMultipleLanes(light->collisionCVs, 2);
