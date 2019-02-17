@@ -26,10 +26,10 @@ typedef struct _SafeTrafficLight {
 	*/
 	TrafficLight base;
 	// TODO: Add any members you need for synchronization here.
-	pthread_mutex_t lockArr[TRAFFIC_LIGHT_LANE_COUNT];
-	pthread_cond_t cvArr[TRAFFIC_LIGHT_LANE_COUNT];
+	pthread_mutex_t laneQueueLocks[TRAFFIC_LIGHT_LANE_COUNT];
+	pthread_cond_t laneQueueCVs[TRAFFIC_LIGHT_LANE_COUNT];
 	pthread_mutex_t trafficLightLock;
-	struct IntQueue *intQueueArr[TRAFFIC_LIGHT_LANE_COUNT];
+	struct IntQueue *laneQueues[TRAFFIC_LIGHT_LANE_COUNT];
 
 	/**
 	 * @brief A collision lock prevents collisions between cars going straight and cars turning left. A car going

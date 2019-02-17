@@ -84,3 +84,11 @@ void cvWait(pthread_cond_t *cond, pthread_mutex_t *lock);
 * @param cond pointer to the cv
 */
 void cvBroadcast(pthread_cond_t *cond);
+
+/**
+ * Wake up cars that are waiting so they can re-check their condition
+ *
+ * @param an array of conditional variables to broadcast to
+ * @param arrLength the length of the array
+ */
+void broadcastMultipleLanes(pthread_cond_t *cvArr, int arrLength);

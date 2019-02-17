@@ -32,6 +32,7 @@ void cvWait(pthread_cond_t* cond, pthread_mutex_t* lock){
     }
 	
 }
+
 void cvBroadcast(pthread_cond_t* cond){
 	int returnValue = pthread_cond_broadcast(cond);
 	if (returnValue != 0) {
@@ -82,4 +83,10 @@ void freeQueue(IntQueue_t *q){
 		}
 	}
 	free(q);
+}
+
+void broadcastMultipleLanes(pthread_cond_t *cvArr, int arrLength){
+	for (int i = 0; i < arrLength; i++) {
+		cvBroadcast(&cvArr[i]);
+	}
 }
