@@ -6,7 +6,8 @@
 */
 #include "car.h"
 #include "trafficLight.h"
-// #include "syncUtils.h"
+
+#define COLLISION_LOCK_COUNT 4
 
 /**
 * @brief Structure that you can modify as part of your solution to implement
