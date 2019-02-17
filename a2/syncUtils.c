@@ -41,6 +41,12 @@ void cvBroadcast(pthread_cond_t* cond){
     }
 }
 
+void broadcastMultipleLanes(pthread_cond_t *cvArr, int arrLength){
+    for (int i = 0; i < arrLength; i++) {
+        cvBroadcast(&cvArr[i]);
+    }
+}
+
 IntQueue_t *initIntQueue(){
 	IntQueue_t *int_queue = malloc(sizeof(IntQueue_t));
 	int_queue->head = NULL;
@@ -83,10 +89,4 @@ void freeQueue(IntQueue_t *q){
 		}
 	}
 	free(q);
-}
-
-void broadcastMultipleLanes(pthread_cond_t *cvArr, int arrLength){
-	for (int i = 0; i < arrLength; i++) {
-		cvBroadcast(&cvArr[i]);
-	}
 }
