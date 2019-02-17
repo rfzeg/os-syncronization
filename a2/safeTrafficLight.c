@@ -16,7 +16,7 @@ void initSafeTrafficLight(SafeTrafficLight* light, int horizontal, int vertical)
 		initConditionVariable(&light->laneQueueCVs[i]);
         light->laneQueues[i] = initIntQueue();
 	}
-	for(i = 0; i < 2;i++) {
+	for(i = 0; i < 4;i++) {
 		initMutex(&light->collisionLocks[i]);
 		initConditionVariable(&light->collisionCVs[i]);
 
@@ -34,7 +34,7 @@ void destroySafeTrafficLight(SafeTrafficLight* light) {
 		destroyConditionVariable(&light->laneQueueCVs[i]);
 		freeQueue(light->laneQueues[i]);
 	}
-	for(i=0; i < 2; i++) {
+	for(i=0; i < 4; i++) {
 		destroyMutex(&light->collisionLocks[i]);
 		destroyConditionVariable(&light->collisionCVs[i]);
 	}
@@ -60,7 +60,7 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 
 	broadcastMultipleLanes(light->laneQueueCVs, TRAFFIC_LIGHT_LANE_COUNT);
 
-	int collisionLockIndex = car->position % 2;
+	int collisionLockIndex = car->position;
 	if (car->action == LEFT_TURN){
 			lock(&light->collisionLocks[collisionLockIndex]);
 			CarPosition opposite = getOppositePosition(car->position);
@@ -69,7 +69,7 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 			while (getStraightCount(&light->base, (int) opposite) > 0){
 				cvWait(&light->collisionCVs[collisionLockIndex], &light->collisionLocks[collisionLockIndex]);
 			}
-			broadcastMultipleLanes(light->collisionCVs, 2);
+				broadcastMultipleLanes(light->collisionCVs, 2);
 
             unlock(&light->collisionLocks[collisionLockIndex]);
 	}
