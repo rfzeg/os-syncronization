@@ -64,9 +64,7 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 	switch (car->action) {
 		case 0: // straight
 			// get the collision lock to block left turners when going straight
-//			lock(&light->collisionLocks[collisionLockIndex]);
 			actTrafficLight(car, &light->base, NULL, NULL, NULL);
-//			unlock(&light->collisionLocks[collisionLockIndex]);
 			break;
 		case 1: // right turns
 			// car going right. nothing to do
@@ -80,11 +78,12 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 			while (getStraightCount(&light->base, (int) opposite) > 0){
 				cvWait(&light->collisionCVs[collisionLockIndex], &light->collisionLocks[collisionLockIndex]);
 			}
-            unlock(&light->collisionLocks[collisionLockIndex]);
 
 			// after acting on traffic light, we broadcast to let them know were done
 			actTrafficLight(car, &light->base, NULL, NULL, NULL);
-			broadcastMultipleLanes(light->collisionCVs, 2);
+            broadcastMultipleLanes(light->collisionCVs, 2);
+            unlock(&light->collisionLocks[collisionLockIndex]);
+
             break;
 		default:
 			break;
