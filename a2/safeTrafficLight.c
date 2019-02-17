@@ -60,7 +60,12 @@ void runTrafficLightCar(Car* car, SafeTrafficLight* light) {
 
 	broadcastMultipleLanes(light->laneQueueCVs, TRAFFIC_LIGHT_LANE_COUNT);
 
+<<<<<<< HEAD
 	int collisionLockIndex = car->position;
+=======
+	int collisionLockIndex = car->position % 2;
+
+>>>>>>> 4924ca9f3f4557d26b382604253d36e1229f4d2b
 	if (car->action == LEFT_TURN){
 			lock(&light->collisionLocks[collisionLockIndex]);
 			CarPosition opposite = getOppositePosition(car->position);
